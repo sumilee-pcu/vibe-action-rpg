@@ -37,7 +37,7 @@
 - [x] 4.5 Implement disengage and return-to-home behavior
 - [x] 4.6 Prevent dead enemies from moving, attacking, or issuing repeated rewards
 - [x] 4.7 Add the minimum spatial-separation rule for five simultaneous melee enemies
-- [ ] 4.8 Record the enemy state-transition test matrix and a NavMesh troubleshooting case
+- [x] 4.8 Record the enemy state-transition test matrix and a NavMesh troubleshooting case
 
 ## 5. Skills and Progression
 

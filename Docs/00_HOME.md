@@ -42,6 +42,7 @@ status: active
 - 적 이탈·홈 복귀: [[24_ENEMY_RETURN_HOME]]
 - 적 사망 행동·보상 차단: [[25_ENEMY_DEATH_GUARD]]
 - 다섯 적 접근 슬롯·공간 분리: [[26_ENEMY_SPATIAL_SEPARATION]]
+- M3 적 AI 검증 매트릭스: [[27_M3_ENEMY_AI_VALIDATION]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]
