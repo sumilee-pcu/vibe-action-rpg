@@ -19,8 +19,8 @@
 
 ## 3. Health and Combat Rules
 
-- [ ] 3.1 Implement pure C# health, damage, and single-fire death rules
-- [ ] 3.2 Add EditMode tests for health bounds, lethal damage, and repeated damage after death
+- [x] 3.1 Implement pure C# health, damage, and single-fire death rules
+- [x] 3.2 Add EditMode tests for health bounds, lethal damage, and repeated damage after death
 - [ ] 3.3 Create actor and attack definition ScriptableObjects without runtime state
 - [ ] 3.4 Connect player attack animation to a configurable active hit window
 - [ ] 3.5 Implement one-hit-per-target-per-attack execution semantics
