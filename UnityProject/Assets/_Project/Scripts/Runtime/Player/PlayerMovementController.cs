@@ -17,14 +17,29 @@ namespace TinyVanguard.Player
         [SerializeField] private float _gravity = -20f;
         [SerializeField] private float _groundedVerticalVelocity = -2f;
 
+        [Header("Dodge")]
+        [SerializeField, Min(0f)] private float _dodgeDistance = 4f;
+        [SerializeField, Min(0.01f)] private float _dodgeDuration = 0.35f;
+        [SerializeField, Min(0f)] private float _invulnerabilityStart = 0.05f;
+        [SerializeField, Min(0f)] private float _invulnerabilityEnd = 0.25f;
+
         private CharacterController _characterController = null!;
+        private InputActionMap _gameplayMap = null!;
         private InputAction _moveAction = null!;
+        private InputAction _dodgeAction = null!;
+        private readonly PlayerDodgeState _dodgeState = new();
         private float _verticalVelocity;
 
         public Transform CameraTransform => _cameraTransform;
         public InputActionAsset InputActions => _inputActions;
         public float MoveSpeed => _moveSpeed;
         public float TurnSpeedDegreesPerSecond => _turnSpeedDegreesPerSecond;
+        public float DodgeDistance => _dodgeDistance;
+        public float DodgeDuration => _dodgeDuration;
+        public float InvulnerabilityStart => _invulnerabilityStart;
+        public float InvulnerabilityEnd => _invulnerabilityEnd;
+        public bool IsDodging => _dodgeState.IsActive;
+        public bool IsInvulnerable => _dodgeState.IsInvulnerable;
 
         private void Awake()
         {
@@ -35,12 +50,13 @@ namespace TinyVanguard.Player
                 _inputActions = InputSystem.actions;
             }
 
-            var gameplayMap = _inputActions?.FindActionMap("Gameplay");
-            _moveAction = gameplayMap?.FindAction("Move");
-            if (gameplayMap == null || _moveAction == null)
+            _gameplayMap = _inputActions?.FindActionMap("Gameplay");
+            _moveAction = _gameplayMap?.FindAction("Move");
+            _dodgeAction = _gameplayMap?.FindAction("Dodge");
+            if (_gameplayMap == null || _moveAction == null || _dodgeAction == null)
             {
                 Debug.LogError(
-                    $"[{nameof(PlayerMovementController)}] Missing Gameplay/Move input.",
+                    $"[{nameof(PlayerMovementController)}] Missing Gameplay/Move or Dodge input.",
                     this);
                 enabled = false;
                 return;
@@ -73,18 +89,39 @@ namespace TinyVanguard.Player
                 input,
                 _cameraTransform.forward);
 
+            if (!_gameplayMap.enabled)
+            {
+                _dodgeState.Cancel();
+            }
+            else if (_dodgeAction.WasPressedThisFrame() && !_dodgeState.IsActive)
+            {
+                var dodgeDirection = worldDirection.sqrMagnitude > 0f
+                    ? worldDirection
+                    : transform.forward;
+                _dodgeState.TryStart(
+                    dodgeDirection,
+                    _dodgeDuration,
+                    _invulnerabilityStart,
+                    _invulnerabilityEnd);
+            }
+
             UpdateVerticalVelocity(deltaTime);
 
-            var horizontalDisplacement = CameraRelativeMovement.GetDisplacement(
-                worldDirection,
-                _moveSpeed,
-                deltaTime);
+            var horizontalDisplacement = _dodgeState.IsActive
+                ? _dodgeState.Step(deltaTime, _dodgeDistance)
+                : CameraRelativeMovement.GetDisplacement(
+                    worldDirection,
+                    _moveSpeed,
+                    deltaTime);
             var verticalDisplacement = Vector3.up * (_verticalVelocity * deltaTime);
             _characterController.Move(horizontalDisplacement + verticalDisplacement);
 
+            var facingDirection = _dodgeState.IsActive
+                ? _dodgeState.Direction
+                : worldDirection;
             transform.rotation = CameraRelativeMovement.RotateTowardsMovement(
                 transform.rotation,
-                worldDirection,
+                facingDirection,
                 _turnSpeedDegreesPerSecond,
                 deltaTime);
         }
@@ -94,6 +131,16 @@ namespace TinyVanguard.Player
             _moveSpeed = Mathf.Max(0f, _moveSpeed);
             _turnSpeedDegreesPerSecond = Mathf.Max(0f, _turnSpeedDegreesPerSecond);
             _groundedVerticalVelocity = Mathf.Min(0f, _groundedVerticalVelocity);
+            _dodgeDistance = Mathf.Max(0f, _dodgeDistance);
+            _dodgeDuration = Mathf.Max(0.01f, _dodgeDuration);
+            _invulnerabilityStart = Mathf.Clamp(
+                _invulnerabilityStart,
+                0f,
+                _dodgeDuration);
+            _invulnerabilityEnd = Mathf.Clamp(
+                _invulnerabilityEnd,
+                _invulnerabilityStart,
+                _dodgeDuration);
         }
 
         private void UpdateVerticalVelocity(float deltaTime)

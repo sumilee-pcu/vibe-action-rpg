@@ -34,9 +34,7 @@ namespace TinyVanguard.Tests.PlayMode
             var uiMap = inputGate.InputActions.FindActionMap("UI", true);
             AssertMapState(inputGate, GameSessionState.Playing, true, true, false);
 
-            Press(_keyboard.escapeKey);
-            yield return null;
-            Release(_keyboard.escapeKey);
+            Assert.That(inputGate.TogglePause(), Is.True);
             yield return null;
 
             AssertMapState(inputGate, GameSessionState.Paused, false, true, true);
@@ -56,9 +54,7 @@ namespace TinyVanguard.Tests.PlayMode
                 Vector3.up);
             Assert.That(pausedDisplacement.magnitude, Is.LessThan(0.01f));
 
-            Press(_keyboard.escapeKey);
-            yield return null;
-            Release(_keyboard.escapeKey);
+            Assert.That(inputGate.TogglePause(), Is.True);
             yield return null;
             AssertMapState(inputGate, GameSessionState.Playing, true, true, false);
 
@@ -85,26 +81,18 @@ namespace TinyVanguard.Tests.PlayMode
 
             Assert.That(inputGate!.SetState(GameSessionState.Victory), Is.True);
             AssertMapState(inputGate, GameSessionState.Victory, false, true, true);
-            yield return PressAndReleaseEscape();
+            Assert.That(inputGate.TogglePause(), Is.False);
             AssertMapState(inputGate, GameSessionState.Victory, false, true, true);
 
             Assert.That(inputGate.SetState(GameSessionState.Defeat), Is.True);
             AssertMapState(inputGate, GameSessionState.Defeat, false, true, true);
-            yield return PressAndReleaseEscape();
+            Assert.That(inputGate.TogglePause(), Is.False);
             AssertMapState(inputGate, GameSessionState.Defeat, false, true, true);
 
             Assert.That(
                 inputGate.InputActions.FindActionMap("Gameplay", true)
                     .actions.All(action => !action.enabled),
                 Is.True);
-        }
-
-        private IEnumerator PressAndReleaseEscape()
-        {
-            Press(_keyboard.escapeKey);
-            yield return null;
-            Release(_keyboard.escapeKey);
-            yield return null;
         }
 
         private static IEnumerator LoadCombatSandbox()

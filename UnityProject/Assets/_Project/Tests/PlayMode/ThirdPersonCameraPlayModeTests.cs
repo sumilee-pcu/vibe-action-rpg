@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using NUnit.Framework;
 using TinyVanguard.CameraControl;
+using TinyVanguard.Player;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -77,20 +78,31 @@ namespace TinyVanguard.Tests.PlayMode
             var player = GameObject.FindWithTag("Player");
             var camera = Camera.main;
             var occlusionCases = GameObject.Find("Camera Occlusion Cases");
+            var cinemachineCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+            var orbitalFollow = Object.FindFirstObjectByType<CinemachineOrbitalFollow>();
+            var movementController = player!.GetComponent<PlayerMovementController>();
             Assert.That(player, Is.Not.Null);
             Assert.That(camera, Is.Not.Null);
             Assert.That(occlusionCases, Is.Not.Null);
+            Assert.That(cinemachineCamera, Is.Not.Null);
+            Assert.That(orbitalFollow, Is.Not.Null);
+            Assert.That(movementController, Is.Not.Null);
 
             occlusionCases!.SetActive(false);
-            yield return new WaitForSeconds(0.2f);
+            movementController!.enabled = false;
+            orbitalFollow!.TrackerSettings.PositionDamping = Vector3.zero;
+            cinemachineCamera!.PreviousStateIsValid = false;
+            yield return null;
 
             var startCameraPosition = camera!.transform.position;
             player!.transform.position += Vector3.right * 3f;
-            yield return new WaitForSeconds(0.75f);
+            cinemachineCamera.PreviousStateIsValid = false;
+            yield return null;
+            yield return null;
 
             Assert.That(
                 Vector3.Distance(camera.transform.position, startCameraPosition),
-                Is.GreaterThan(0.25f));
+                Is.GreaterThan(2.5f));
         }
 
         [UnityTest]

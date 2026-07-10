@@ -143,6 +143,16 @@ namespace TinyVanguard.Editor
                 "Player movement must reference Main Camera.");
             Require(movementController.InputActions == inputActions,
                 "Player movement must reference TinyVanguardInput.");
+            Require(movementController.DodgeDistance > 0f,
+                "Player dodge distance must be positive.");
+            Require(movementController.DodgeDuration > 0f,
+                "Player dodge duration must be positive.");
+            Require(movementController.InvulnerabilityStart
+                    <= movementController.InvulnerabilityEnd,
+                "Player dodge invulnerability window is invalid.");
+            Require(inputActions.FindActionMap("Gameplay", true)
+                    .FindAction("Dodge", true) != null,
+                "TinyVanguardInput requires Gameplay/Dodge.");
             Require(player.transform.Find("Visual") != null, "Player visual is missing.");
             Require(player.transform.Find("Facing Marker") != null,
                 "Player facing marker is missing.");

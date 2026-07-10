@@ -766,6 +766,10 @@ MonoBehaviour:
   _turnSpeedDegreesPerSecond: 720
   _gravity: -20
   _groundedVerticalVelocity: -2
+  _dodgeDistance: 4
+  _dodgeDuration: 0.35
+  _invulnerabilityStart: 0.05
+  _invulnerabilityEnd: 0.25
 --- !u!143 &652039321
 CharacterController:
   m_ObjectHideFlags: 0

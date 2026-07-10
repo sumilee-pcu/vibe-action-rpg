@@ -27,6 +27,8 @@ status: active
 - 3인칭 카메라 계약: [[09_THIRD_PERSON_CAMERA]]
 - 카메라 장애물 가림 처리: [[10_CAMERA_OCCLUSION]]
 - 게임플레이 입력 차단: [[11_GAMEPLAY_INPUT_GATING]]
+- 플레이어 회피·무적: [[12_PLAYER_DODGE]]
+- M1 플레이어 조작 통합 실습: [[13_M1_PLAYER_CONTROL_LAB]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]
