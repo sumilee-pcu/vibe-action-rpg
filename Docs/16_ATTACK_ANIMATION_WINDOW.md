@@ -39,7 +39,7 @@ flowchart LR
     A["왼쪽 클릭"] --> B["TryStartAttack"]
     B --> C["Animator Attack Trigger"]
     C --> D["0.15 OpenHitWindow"]
-    D --> E["후속 공격 판정 실행 구간"]
+    D --> E["물리 범위 탐지·실제 피해"]
     E --> F["0.30 CloseHitWindow"]
     F --> G["0.50 CompleteAttack"]
 ```
@@ -56,7 +56,7 @@ flowchart LR
 - Paused·Victory·Defeat에서 공격 시작을 거부한다.
 - 공격 중 Gameplay 맵이 꺼지면 Idle로 복귀하고 판정 창을 닫는다.
 - 판정 시작 전과 종료 후에는 `IsHitWindowActive=false`다.
-- 실제 대상 탐지와 피해는 OpenSpec 3.5에서 이 활성 창 안에서만 실행한다.
+- OpenSpec 3.5의 실행별 단일 타격 규칙과 3.8의 실제 범위 탐지는 이 활성 창이 열릴 때 실행한다.
 
 ## 자동 생성
 
@@ -66,6 +66,7 @@ flowchart LR
 - `PlayerCombat.controller`
 - Player의 Animator
 - PlayerAttackController와 Input Actions·BasicAttack 참조
+- 이동을 막지 않는 Trigger 기반 TrainingTarget
 
 ## 자동 검증
 

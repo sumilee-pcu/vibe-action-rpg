@@ -45,8 +45,11 @@ namespace TinyVanguard.Editor
                 ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             var definition = AssetDatabase.LoadAssetAtPath<AttackDefinition>(
                 CombatDefinitionTools.BasicAttackDefinitionPath);
+            var actorDefinition = AssetDatabase.LoadAssetAtPath<ActorDefinition>(
+                CombatDefinitionTools.PlayerDefinitionPath);
             var inputActions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
             Require(definition != null, "Create default combat definitions first.");
+            Require(actorDefinition != null, "Create default combat definitions first.");
             Require(inputActions != null, "TinyVanguardInput is missing.");
 
             var clip = CreateAttackClip(definition!);
@@ -69,8 +72,20 @@ namespace TinyVanguard.Editor
                 attackController = player.AddComponent<PlayerAttackController>();
             }
             attackController.Configure(inputActions!, definition!, animator);
+            var trainingTarget = ConfigureTrainingTarget(
+                scene,
+                player.transform,
+                actorDefinition!,
+                definition!);
 
-            Validate(clip, controller, animator, attackController, definition!);
+            Validate(
+                clip,
+                controller,
+                animator,
+                attackController,
+                definition!,
+                actorDefinition!,
+                trainingTarget);
             EditorUtility.SetDirty(player);
             EditorUtility.SetDirty(animator);
             EditorUtility.SetDirty(attackController);
@@ -78,6 +93,55 @@ namespace TinyVanguard.Editor
             Require(EditorSceneManager.SaveScene(scene), "Failed to save CombatSandbox.");
             AssetDatabase.SaveAssets();
             Debug.Log("[Tiny Vanguard] Player attack animation and active window configured.");
+        }
+
+        private static ActorHealth ConfigureTrainingTarget(
+            Scene scene,
+            Transform player,
+            ActorDefinition actorDefinition,
+            AttackDefinition attackDefinition)
+        {
+            var target = scene.GetRootGameObjects()
+                .FirstOrDefault(root => root.name == "TrainingTarget");
+            if (target == null)
+            {
+                target = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                target.name = "TrainingTarget";
+            }
+
+            target.transform.position = player.position
+                + Vector3.up
+                + player.forward * attackDefinition.Range;
+            target.transform.rotation = Quaternion.identity;
+            target.transform.localScale = new Vector3(0.8f, 1f, 0.8f);
+            var targetCollider = target.GetComponent<Collider>();
+            Require(targetCollider != null, "Training target collider is missing.");
+            targetCollider!.isTrigger = true;
+
+            var health = target.GetComponent<ActorHealth>();
+            if (health == null)
+            {
+                health = target.AddComponent<ActorHealth>();
+            }
+            var serializedHealth = new SerializedObject(health);
+            var definitionProperty = serializedHealth.FindProperty("_definition");
+            Require(definitionProperty != null,
+                "Training target definition field is missing.");
+            definitionProperty!.objectReferenceValue = actorDefinition;
+            serializedHealth.ApplyModifiedPropertiesWithoutUndo();
+            health.Configure(actorDefinition);
+
+            var reactions = target.GetComponent<ActorReactionController>();
+            if (reactions == null)
+            {
+                reactions = target.AddComponent<ActorReactionController>();
+            }
+            reactions.Configure(health);
+
+            EditorUtility.SetDirty(target);
+            EditorUtility.SetDirty(health);
+            EditorUtility.SetDirty(reactions);
+            return health;
         }
 
         private static AnimationClip CreateAttackClip(AttackDefinition definition)
@@ -151,7 +215,9 @@ namespace TinyVanguard.Editor
             AnimatorController controller,
             Animator animator,
             PlayerAttackController attackController,
-            AttackDefinition definition)
+            AttackDefinition definition,
+            ActorDefinition actorDefinition,
+            ActorHealth trainingTarget)
         {
             var events = AnimationUtility.GetAnimationEvents(clip);
             Require(events.Length == 3, "BasicAttack requires three animation events.");
@@ -169,6 +235,10 @@ namespace TinyVanguard.Editor
                 "Player Animator controller is invalid.");
             Require(attackController.AttackDefinition == definition,
                 "Player attack definition reference is invalid.");
+            Require(trainingTarget.Definition == actorDefinition,
+                "Training target actor definition is invalid.");
+            Require(trainingTarget.GetComponent<Collider>()?.isTrigger == true,
+                "Training target must use a non-blocking trigger collider.");
         }
 
         private static void EnsureAnimationFolder()

@@ -34,6 +34,7 @@ status: active
 - 기본 공격 애니메이션·판정 창: [[16_ATTACK_ANIMATION_WINDOW]]
 - 공격 실행별 단일 타격: [[17_ATTACK_EXECUTION]]
 - 피격·사망·피해 출력 이벤트: [[18_COMBAT_FEEDBACK_EVENTS]]
+- 공격 애니메이션·피해 타이밍 측정: [[19_ATTACK_TIMING_MEASUREMENT]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]

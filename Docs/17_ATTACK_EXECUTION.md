@@ -60,7 +60,7 @@ flowchart LR
 
 ## 다음 연결
 
-OpenSpec 3.7에서는 ActorHealth의 체력 변화·사망 이벤트를 Hit 반응, Death 전이와 데미지 숫자 출력 이벤트에 연결한다. 실제 Player 공격 범위 탐지는 현재 활성 판정 창과 `AttackHitResolver`를 사용한다.
+OpenSpec 3.7은 ActorHealth의 체력 변화·사망 이벤트를 Hit 반응, Death 전이와 데미지 숫자 출력 이벤트에 연결했다. OpenSpec 3.8은 활성 판정 창에서 실제 Player 범위 탐지와 `AttackHitResolver`를 실행하도록 완성했다.
 
 ## 연결
 

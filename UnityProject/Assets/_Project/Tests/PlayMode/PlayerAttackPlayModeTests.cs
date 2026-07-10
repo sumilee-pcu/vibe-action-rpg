@@ -24,14 +24,36 @@ namespace TinyVanguard.Tests.PlayMode
         {
             yield return LoadCombatSandbox();
             var attack = Object.FindFirstObjectByType<PlayerAttackController>();
+            var trainingTarget = GameObject.Find("TrainingTarget")?.GetComponent<ActorHealth>();
             Assert.That(attack, Is.Not.Null);
+            Assert.That(trainingTarget, Is.Not.Null);
+
+            var timingEventCount = 0;
+            var timing = default(AttackTimingSample);
+            attack!.AttackResolved += sample =>
+            {
+                timingEventCount++;
+                timing = sample;
+            };
 
             Press(_mouse.leftButton);
             yield return null;
             Release(_mouse.leftButton);
             yield return new WaitForSeconds(0.2f);
-            Assert.That(attack!.IsAttackInProgress, Is.True);
+            Assert.That(attack.IsAttackInProgress, Is.True);
             Assert.That(attack.IsHitWindowActive, Is.True);
+            Assert.That(timingEventCount, Is.EqualTo(1));
+            Assert.That(timing.AppliedTargetCount, Is.EqualTo(1));
+            Assert.That(trainingTarget!.State.CurrentHealth, Is.EqualTo(85));
+            Assert.That(timing.DelaySeconds, Is.InRange(0.10d, 0.25d));
+            Assert.That(
+                timing.DelaySeconds,
+                Is.EqualTo(attack.AttackDefinition.ActiveStartTime).Within(0.10d));
+            TestContext.WriteLine(
+                $"Attack timing: sequence={timing.AttackSequence}, "
+                + $"delay={timing.DelaySeconds:F4}s, "
+                + $"configured={attack.AttackDefinition.ActiveStartTime:F4}s, "
+                + $"targets={timing.AppliedTargetCount}");
 
             yield return new WaitForSeconds(0.2f);
             Assert.That(attack.IsHitWindowActive, Is.False);

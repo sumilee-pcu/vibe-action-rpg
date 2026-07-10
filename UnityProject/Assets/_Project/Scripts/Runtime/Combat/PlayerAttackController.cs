@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,8 @@ namespace TinyVanguard.Combat
     {
         public const string AttackTrigger = "Attack";
         public const string IdleState = "Idle";
+        private const int HitBufferCapacity = 16;
+        private const float DefaultHitHeight = 1f;
 
         [SerializeField] private InputActionAsset _inputActions = null!;
         [SerializeField] private AttackDefinition _attackDefinition = null!;
@@ -17,6 +20,10 @@ namespace TinyVanguard.Combat
 
         private InputActionMap _gameplayMap = null!;
         private InputAction _attackAction = null!;
+        private readonly Collider[] _hitBuffer = new Collider[HitBufferCapacity];
+        private double _attackStartedAt;
+
+        public event Action<AttackTimingSample> AttackResolved = delegate { };
 
         public InputActionAsset InputActions => _inputActions;
         public AttackDefinition AttackDefinition => _attackDefinition;
@@ -25,6 +32,8 @@ namespace TinyVanguard.Combat
         public bool IsHitWindowActive { get; private set; }
         public int AttackSequence { get; private set; }
         public AttackExecution? CurrentExecution { get; private set; }
+        public bool HasTimingSample { get; private set; }
+        public AttackTimingSample LastTimingSample { get; private set; }
 
         public void Configure(
             InputActionAsset inputActions,
@@ -117,6 +126,7 @@ namespace TinyVanguard.Combat
             IsHitWindowActive = false;
             AttackSequence++;
             CurrentExecution = new AttackExecution(AttackSequence);
+            _attackStartedAt = Time.timeAsDouble;
             _animator.ResetTrigger(AttackTrigger);
             _animator.SetTrigger(AttackTrigger);
             return true;
@@ -124,10 +134,41 @@ namespace TinyVanguard.Combat
 
         public void OpenHitWindow()
         {
-            if (IsAttackInProgress)
+            if (!IsAttackInProgress)
             {
-                IsHitWindowActive = true;
+                return;
             }
+
+            IsHitWindowActive = true;
+            if (CurrentExecution == null)
+            {
+                return;
+            }
+
+            var hitCenter = transform.position
+                + Vector3.up * DefaultHitHeight
+                + transform.forward * _attackDefinition.Range;
+            var colliderCount = Physics.OverlapSphereNonAlloc(
+                hitCenter,
+                _attackDefinition.HitRadius,
+                _hitBuffer,
+                Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Collide);
+            var appliedTargetCount = AttackHitResolver.ApplyDamage(
+                _hitBuffer,
+                colliderCount,
+                CurrentExecution,
+                _attackDefinition.BaseDamage,
+                _actorHealth);
+            var resolvedAt = Time.timeAsDouble;
+            LastTimingSample = new AttackTimingSample(
+                AttackSequence,
+                _attackStartedAt,
+                resolvedAt,
+                appliedTargetCount);
+            HasTimingSample = true;
+            AttackResolved(LastTimingSample);
+            Array.Clear(_hitBuffer, 0, colliderCount);
         }
 
         public void CloseHitWindow()
