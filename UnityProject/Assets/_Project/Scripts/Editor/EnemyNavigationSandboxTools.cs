@@ -16,7 +16,14 @@ namespace TinyVanguard.Editor
         public const string NavigationFolder = "Assets/_Project/Navigation";
         public const string NavMeshDataPath = NavigationFolder + "/CombatSandboxNavMesh.asset";
         private const string ScenePath = "Assets/_Project/Scenes/CombatSandbox.unity";
-        private const string EnemyName = "MeleeGrunt";
+        private static readonly string[] EnemyNames =
+        {
+            "MeleeGrunt",
+            "MeleeGrunt_02",
+            "MeleeGrunt_03",
+            "MeleeGrunt_04",
+            "MeleeGrunt_05"
+        };
 
         [MenuItem("Tiny Vanguard/Setup Enemy Navigation Sandbox")]
         public static void ConfigureFromMenu()
@@ -50,9 +57,26 @@ namespace TinyVanguard.Editor
 
             var surface = ConfigureSurface(scene);
             var playerHealth = ConfigurePlayerHealth(scene, playerDefinition!);
-            var enemy = ConfigureEnemy(scene, definition!, playerHealth);
+            var enemies = new EnemyNavigationController[EnemyNames.Length];
+            for (var index = 0; index < EnemyNames.Length; index++)
+            {
+                var startPosition = EnemyApproachSlots.GetPosition(
+                    playerHealth.transform.position,
+                    index,
+                    EnemyNames.Length,
+                    4f);
+                enemies[index] = ConfigureEnemy(
+                    scene,
+                    definition!,
+                    playerHealth,
+                    EnemyNames[index],
+                    startPosition,
+                    index,
+                    EnemyNames.Length,
+                    index == 0);
+            }
             BakeSurface(surface);
-            Validate(surface, enemy, definition!);
+            Validate(surface, enemies, definition!);
 
             EditorSceneManager.MarkSceneDirty(scene);
             Require(EditorSceneManager.SaveScene(scene), "Failed to save CombatSandbox.");
@@ -88,16 +112,21 @@ namespace TinyVanguard.Editor
         private static EnemyNavigationController ConfigureEnemy(
             Scene scene,
             EnemyDefinition definition,
-            ActorHealth playerHealth)
+            ActorHealth playerHealth,
+            string enemyName,
+            Vector3 startPosition,
+            int approachSlotIndex,
+            int approachSlotCount,
+            bool brainEnabled)
         {
             var enemy = scene.GetRootGameObjects()
-                .FirstOrDefault(root => root.name == EnemyName);
+                .FirstOrDefault(root => root.name == enemyName);
             if (enemy == null)
             {
-                enemy = new GameObject(EnemyName);
+                enemy = new GameObject(enemyName);
             }
 
-            enemy.transform.position = new Vector3(4f, 0f, 4f);
+            enemy.transform.position = startPosition;
             enemy.transform.rotation = Quaternion.identity;
 
             var collider = enemy.GetComponent<CapsuleCollider>();
@@ -118,7 +147,7 @@ namespace TinyVanguard.Editor
             agent.acceleration = 12f;
             agent.angularSpeed = 720f;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
-            agent.avoidancePriority = 50;
+            agent.avoidancePriority = 50 + approachSlotIndex;
             agent.speed = definition.MoveSpeed;
             agent.stoppingDistance = definition.NavigationStoppingDistance;
             agent.radius = Mathf.Max(0.1f, definition.SeparationRadius * 0.5f);
@@ -157,13 +186,18 @@ namespace TinyVanguard.Editor
                 navigation,
                 health,
                 playerHealth.transform,
-                playerHealth);
+                playerHealth,
+                approachSlotIndex,
+                approachSlotCount);
             SerializeBrainReferences(
                 brain,
                 definition,
                 navigation,
                 health,
-                playerHealth);
+                playerHealth,
+                approachSlotIndex,
+                approachSlotCount);
+            brain.enabled = brainEnabled;
 
             EnsureVisual(enemy.transform);
             EditorUtility.SetDirty(enemy);
@@ -241,7 +275,9 @@ namespace TinyVanguard.Editor
             EnemyDefinition definition,
             EnemyNavigationController navigation,
             ActorHealth selfHealth,
-            ActorHealth playerHealth)
+            ActorHealth playerHealth,
+            int approachSlotIndex,
+            int approachSlotCount)
         {
             var serialized = new SerializedObject(brain);
             RequireProperty(serialized, "_definition").objectReferenceValue = definition;
@@ -249,6 +285,8 @@ namespace TinyVanguard.Editor
             RequireProperty(serialized, "_selfHealth").objectReferenceValue = selfHealth;
             RequireProperty(serialized, "_target").objectReferenceValue = playerHealth.transform;
             RequireProperty(serialized, "_targetHealth").objectReferenceValue = playerHealth;
+            RequireProperty(serialized, "_approachSlotIndex").intValue = approachSlotIndex;
+            RequireProperty(serialized, "_approachSlotCount").intValue = approachSlotCount;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(brain);
         }
@@ -266,14 +304,18 @@ namespace TinyVanguard.Editor
 
         private static void Validate(
             NavMeshSurface surface,
-            EnemyNavigationController enemy,
+            EnemyNavigationController[] enemies,
             EnemyDefinition definition)
         {
             Require(surface.navMeshData != null, "CombatSandbox NavMesh data is missing.");
             Require(
                 AssetDatabase.GetAssetPath(surface.navMeshData) == NavMeshDataPath,
                 "CombatSandbox NavMesh data path is invalid.");
-            Require(enemy.Definition == definition, "Enemy definition reference is invalid.");
+            Require(enemies.Length == EnemyNames.Length,
+                "Five Melee Grunt navigation instances are required.");
+            var enemy = enemies[0];
+            Require(enemies.All(item => item != null && item.Definition == definition),
+                "Enemy definition reference is invalid.");
             Require(Mathf.Approximately(enemy.Agent.speed, definition.MoveSpeed),
                 "Enemy NavMeshAgent speed is invalid.");
             Require(Mathf.Approximately(
@@ -285,6 +327,11 @@ namespace TinyVanguard.Editor
                 "Enemy brain definition reference is invalid.");
             Require(brain!.GetComponent<ActorHealth>() != null,
                 "Enemy health adapter is missing.");
+            Require(enemies.Select(item => item.GetComponent<EnemyBrain>())
+                    .Select((item, index) => item.ApproachSlotIndex == index
+                        && item.ApproachSlotCount == EnemyNames.Length)
+                    .All(isValid => isValid),
+                "Enemy approach slot configuration is invalid.");
             Require(NavMesh.SamplePosition(
                     enemy.transform.position,
                     out var startHit,

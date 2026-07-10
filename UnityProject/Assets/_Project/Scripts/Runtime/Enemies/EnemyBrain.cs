@@ -14,6 +14,8 @@ namespace TinyVanguard.Enemies
         [SerializeField] private ActorHealth _selfHealth = null!;
         [SerializeField] private Transform _target = null!;
         [SerializeField] private ActorHealth _targetHealth = null!;
+        [SerializeField, Min(0)] private int _approachSlotIndex;
+        [SerializeField, Min(1)] private int _approachSlotCount = 1;
 
         private EnemyStateMachine _stateMachine = null!;
         private bool _attackFinished;
@@ -31,19 +33,28 @@ namespace TinyVanguard.Enemies
         public int AppliedAttackCount { get; private set; }
         public int DeathHandledCount { get; private set; }
         public int RewardSignalCount { get; private set; }
+        public int ApproachSlotIndex => _approachSlotIndex;
+        public int ApproachSlotCount => _approachSlotCount;
 
         public void Configure(
             EnemyDefinition definition,
             EnemyNavigationController navigation,
             ActorHealth selfHealth,
             Transform target,
-            ActorHealth targetHealth)
+            ActorHealth targetHealth,
+            int approachSlotIndex = 0,
+            int approachSlotCount = 1)
         {
             _definition = definition;
             _navigation = navigation;
             _selfHealth = selfHealth;
             _target = target;
             _targetHealth = targetHealth;
+            _approachSlotCount = Mathf.Max(1, approachSlotCount);
+            _approachSlotIndex = Mathf.Clamp(
+                approachSlotIndex,
+                0,
+                _approachSlotCount - 1);
         }
 
         public float GetRemainingCooldown(double now)
@@ -97,7 +108,17 @@ namespace TinyVanguard.Enemies
                 case EnemyState.Chase:
                     if (targetIsLiving)
                     {
-                        _navigation.TryMoveTo(_target.position);
+                        var destination = EnemyApproachSlots.GetPosition(
+                            _target.position,
+                            _approachSlotIndex,
+                            _approachSlotCount,
+                            _approachSlotCount > 1
+                                ? _definition.NavigationStoppingDistance
+                                : 0f);
+                        var stoppingDistance = _approachSlotCount > 1
+                            ? _definition.HomeTolerance
+                            : _definition.NavigationStoppingDistance;
+                        _navigation.TryMoveTo(destination, stoppingDistance);
                     }
                     break;
 

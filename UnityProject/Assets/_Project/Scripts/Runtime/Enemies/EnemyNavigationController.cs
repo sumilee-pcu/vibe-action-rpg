@@ -49,6 +49,10 @@ namespace TinyVanguard.Enemies
             }
 
             _agent.ResetPath();
+            if (_definition != null)
+            {
+                _agent.stoppingDistance = _definition.NavigationStoppingDistance;
+            }
             _agent.isStopped = true;
         }
 
