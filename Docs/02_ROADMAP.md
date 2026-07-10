@@ -56,6 +56,7 @@ tags:
 ### M3 — 적 AI
 
 - [x] 이동·탐지·공격·이탈·보상 정의 데이터 생성
+- [x] Idle·Chase·Attack·Hit·Return·Dead 순수 상태 전이 검증
 - [ ] 비전투 → 추적 → 공격 → 복귀 흐름 재현
 - [ ] 사망한 적이 이동·공격하지 않음
 - [ ] 적 5개가 동시에 플레이어를 추적할 때 완전히 겹치지 않음
@@ -92,4 +93,4 @@ tags:
 
 ## 다음 행동
 
-현재 OpenSpec은 22/64 완료이며 M3는 1/8 진행됐다. 다음 작업은 4.2 Idle·Chase·Attack·Hit·Return·Dead 상태 전이 구현이다.
+현재 OpenSpec은 23/64 완료이며 M3는 2/8 진행됐다. 다음 작업은 4.3 CombatSandbox NavMesh 베이크와 Agent 이동 구성이다.
