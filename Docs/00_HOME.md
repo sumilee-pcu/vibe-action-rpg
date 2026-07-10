@@ -31,6 +31,7 @@ status: active
 - M1 플레이어 조작 통합 실습: [[13_M1_PLAYER_CONTROL_LAB]]
 - 체력·피해·사망 규칙: [[14_HEALTH_DAMAGE_DEATH]]
 - Actor·Attack 정의 데이터: [[15_COMBAT_DEFINITIONS]]
+- 기본 공격 애니메이션·판정 창: [[16_ATTACK_ANIMATION_WINDOW]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]
