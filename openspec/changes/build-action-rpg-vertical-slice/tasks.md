@@ -9,7 +9,7 @@
 
 ## 2. Player Control and Camera
 
-- [ ] 2.1 Define movement, look, attack, dodge, skill, pause, and UI Input Actions
+- [x] 2.1 Define movement, look, attack, dodge, skill, pause, and UI Input Actions
 - [ ] 2.2 Implement frame-independent camera-relative player movement and facing
 - [ ] 2.3 Configure a Cinemachine third-person follow camera with sensitivity and vertical limits
 - [ ] 2.4 Add camera obstacle handling and verify representative map occlusion cases

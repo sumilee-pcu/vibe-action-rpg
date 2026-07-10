@@ -22,6 +22,7 @@ status: planning
 - 교육과정 구성: [[04_CURRICULUM_MAP]]
 - 기술 환경 기준선: [[05_TECHNICAL_BASELINE]]
 - Git·대형 에셋 정책: [[06_ASSET_AND_GIT_POLICY]]
+- 입력 액션 계약: [[07_INPUT_ACTIONS]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]

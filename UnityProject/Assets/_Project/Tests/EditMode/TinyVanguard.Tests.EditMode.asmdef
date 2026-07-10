@@ -2,7 +2,8 @@
   "name": "TinyVanguard.Tests.EditMode",
   "rootNamespace": "TinyVanguard.Tests.EditMode",
   "references": [
-    "TinyVanguard.Runtime"
+    "TinyVanguard.Runtime",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [
     "Editor"
