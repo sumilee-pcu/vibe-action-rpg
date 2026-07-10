@@ -17,16 +17,20 @@ namespace TinyVanguard.Enemies
 
         private EnemyStateMachine _stateMachine = null!;
         private bool _attackFinished;
+        private bool _deathHandled;
         private double _nextAttackAt;
 
         public event Action<EnemyStateTransition> StateChanged = delegate { };
         public event Action<DamageResult> AttackResolved = delegate { };
+        public event Action<int> RewardAvailable = delegate { };
 
         public EnemyDefinition Definition => _definition;
         public EnemyState CurrentState => _stateMachine?.CurrentState ?? EnemyState.Idle;
         public Vector3 HomePosition { get; private set; }
         public int AttackExecutionCount { get; private set; }
         public int AppliedAttackCount { get; private set; }
+        public int DeathHandledCount { get; private set; }
+        public int RewardSignalCount { get; private set; }
 
         public void Configure(
             EnemyDefinition definition,
@@ -136,6 +140,18 @@ namespace TinyVanguard.Enemies
             }
         }
 
+        private void OnEnable()
+        {
+            if (_selfHealth != null)
+            {
+                _selfHealth.Died += OnSelfDied;
+                if (_selfHealth.State != null && _selfHealth.State.IsDead)
+                {
+                    OnSelfDied(_selfHealth);
+                }
+            }
+        }
+
         private void Update()
         {
             Tick(Time.timeAsDouble);
@@ -143,6 +159,11 @@ namespace TinyVanguard.Enemies
 
         private void OnDisable()
         {
+            if (_selfHealth != null)
+            {
+                _selfHealth.Died -= OnSelfDied;
+            }
+
             if (_navigation != null)
             {
                 _navigation.Stop();
@@ -169,6 +190,21 @@ namespace TinyVanguard.Enemies
         private void OnStateChanged(EnemyStateTransition transition)
         {
             StateChanged(transition);
+        }
+
+        private void OnSelfDied(ActorHealth actor)
+        {
+            if (_deathHandled)
+            {
+                return;
+            }
+
+            _deathHandled = true;
+            DeathHandledCount++;
+            _stateMachine.Tick(new EnemyStateSignals(isDead: true));
+            _navigation.Stop();
+            RewardSignalCount++;
+            RewardAvailable(_definition.ExperienceReward);
         }
     }
 }
