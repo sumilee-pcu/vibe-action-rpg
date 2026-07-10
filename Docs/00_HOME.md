@@ -39,6 +39,7 @@ status: active
 - 일반 적 상태 머신: [[21_ENEMY_STATE_MACHINE]]
 - 적 NavMesh 베이크·이동: [[22_ENEMY_NAVIGATION]]
 - 적 탐지·추적·공격 쿨다운: [[23_ENEMY_DETECTION_COMBAT]]
+- 적 이탈·홈 복귀: [[24_ENEMY_RETURN_HOME]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]

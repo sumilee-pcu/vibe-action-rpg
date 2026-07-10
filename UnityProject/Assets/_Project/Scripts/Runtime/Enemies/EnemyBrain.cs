@@ -62,6 +62,10 @@ namespace TinyVanguard.Enemies
             var targetDistance = targetIsLiving
                 ? Vector3.Distance(transform.position, _target.position)
                 : float.PositiveInfinity;
+            var targetDistanceFromHome = targetIsLiving
+                ? Vector3.Distance(HomePosition, _target.position)
+                : float.PositiveInfinity;
+            var distanceFromHome = Vector3.Distance(transform.position, HomePosition);
             var hasDetectedTarget = targetIsLiving
                 && (CurrentState != EnemyState.Idle
                     || targetDistance <= _definition.DetectionRange);
@@ -74,13 +78,14 @@ namespace TinyVanguard.Enemies
                 hasLivingTarget: hasDetectedTarget,
                 isTargetInAttackRange: targetDistance <= _definition.AttackRange,
                 canAttack: now >= _nextAttackAt,
+                shouldDisengage: targetDistanceFromHome > _definition.DisengageRange,
+                isAtHome: distanceFromHome <= _definition.HomeTolerance,
                 hasFinishedAttack: attackFinished));
 
             switch (CurrentState)
             {
                 case EnemyState.Idle:
                 case EnemyState.Hit:
-                case EnemyState.Return:
                 case EnemyState.Dead:
                     _navigation.Stop();
                     break;
@@ -90,6 +95,10 @@ namespace TinyVanguard.Enemies
                     {
                         _navigation.TryMoveTo(_target.position);
                     }
+                    break;
+
+                case EnemyState.Return:
+                    _navigation.TryMoveTo(HomePosition, _definition.HomeTolerance);
                     break;
 
                 case EnemyState.Attack:

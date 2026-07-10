@@ -23,11 +23,20 @@ namespace TinyVanguard.Enemies
 
         public bool TryMoveTo(Vector3 destination)
         {
+            var stoppingDistance = _definition != null
+                ? _definition.NavigationStoppingDistance
+                : _agent.stoppingDistance;
+            return TryMoveTo(destination, stoppingDistance);
+        }
+
+        public bool TryMoveTo(Vector3 destination, float stoppingDistance)
+        {
             if (_agent == null || !_agent.isActiveAndEnabled || !_agent.isOnNavMesh)
             {
                 return false;
             }
 
+            _agent.stoppingDistance = Mathf.Max(0f, stoppingDistance);
             _agent.isStopped = false;
             return _agent.SetDestination(destination);
         }
