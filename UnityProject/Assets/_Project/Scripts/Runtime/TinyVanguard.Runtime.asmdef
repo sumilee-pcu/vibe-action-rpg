@@ -1,7 +1,9 @@
 {
   "name": "TinyVanguard.Runtime",
   "rootNamespace": "TinyVanguard",
-  "references": [],
+  "references": [
+    "Unity.InputSystem"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

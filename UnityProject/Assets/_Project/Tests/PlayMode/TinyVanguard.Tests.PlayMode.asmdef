@@ -2,7 +2,9 @@
   "name": "TinyVanguard.Tests.PlayMode",
   "rootNamespace": "TinyVanguard.Tests.PlayMode",
   "references": [
-    "TinyVanguard.Runtime"
+    "TinyVanguard.Runtime",
+    "Unity.InputSystem",
+    "Unity.InputSystem.TestFramework"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

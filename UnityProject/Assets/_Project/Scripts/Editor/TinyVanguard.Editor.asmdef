@@ -2,7 +2,8 @@
   "name": "TinyVanguard.Editor",
   "rootNamespace": "TinyVanguard.Editor",
   "references": [
-    "TinyVanguard.Runtime"
+    "TinyVanguard.Runtime",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [
     "Editor"
