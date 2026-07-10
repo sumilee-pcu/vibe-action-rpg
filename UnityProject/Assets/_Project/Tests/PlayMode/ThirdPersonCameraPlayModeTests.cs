@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using TinyVanguard.CameraControl;
 using Unity.Cinemachine;
@@ -85,6 +86,136 @@ namespace TinyVanguard.Tests.PlayMode
             Assert.That(
                 Vector3.Distance(camera.transform.position, startCameraPosition),
                 Is.GreaterThan(0.1f));
+        }
+
+        [UnityTest]
+        public IEnumerator DirectWallPullsCameraForwardAndClearsLineOfSight()
+        {
+            yield return LoadCombatSandbox();
+
+            var camera = Camera.main;
+            var player = GameObject.FindWithTag("Player");
+            var cinemachineCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+            var orbitalFollow = Object.FindFirstObjectByType<CinemachineOrbitalFollow>();
+            var deoccluder = Object.FindFirstObjectByType<CinemachineDeoccluder>();
+            var wall = GameObject.Find("Direct Occlusion Wall");
+
+            Assert.That(camera, Is.Not.Null);
+            Assert.That(player, Is.Not.Null);
+            var cameraTarget = player!.transform.Find("Camera Target");
+            Assert.That(cameraTarget, Is.Not.Null);
+            Assert.That(cinemachineCamera, Is.Not.Null);
+            Assert.That(orbitalFollow, Is.Not.Null);
+            Assert.That(deoccluder, Is.Not.Null);
+            Assert.That(wall, Is.Not.Null);
+
+            yield return new WaitForSeconds(0.25f);
+
+            var targetToCamera = camera!.transform.position - cameraTarget!.position;
+            var wallCollider = wall!.GetComponent<BoxCollider>();
+            Assert.That(deoccluder!.CameraWasDisplaced(cinemachineCamera!), Is.True);
+            Assert.That(targetToCamera.magnitude,
+                Is.LessThan(orbitalFollow!.Radius - 1f));
+            Assert.That(camera.transform.position.z,
+                Is.GreaterThan(wallCollider.bounds.max.z));
+
+            var blockingWallHits = Physics.RaycastAll(
+                    cameraTarget.position,
+                    targetToCamera.normalized,
+                    targetToCamera.magnitude,
+                    1 << 0,
+                    QueryTriggerInteraction.Ignore)
+                .Where(hit => hit.collider == wallCollider);
+            Assert.That(blockingWallHits, Is.Empty);
+        }
+
+        [UnityTest]
+        public IEnumerator SidePillarIsHandledAtQuarterOrbit()
+        {
+            yield return LoadCombatSandbox();
+
+            var directWall = GameObject.Find("Direct Occlusion Wall");
+            var diagonalBlock = GameObject.Find("Diagonal Occlusion Block");
+            var camera = Camera.main;
+            var player = GameObject.FindWithTag("Player");
+            var cinemachineCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+            var orbitalFollow = Object.FindFirstObjectByType<CinemachineOrbitalFollow>();
+            var deoccluder = Object.FindFirstObjectByType<CinemachineDeoccluder>();
+            var pillar = GameObject.Find("Side Occlusion Pillar");
+
+            Assert.That(directWall, Is.Not.Null);
+            Assert.That(diagonalBlock, Is.Not.Null);
+            Assert.That(camera, Is.Not.Null);
+            Assert.That(player, Is.Not.Null);
+            Assert.That(cinemachineCamera, Is.Not.Null);
+            Assert.That(orbitalFollow, Is.Not.Null);
+            Assert.That(deoccluder, Is.Not.Null);
+            Assert.That(pillar, Is.Not.Null);
+            var cameraTarget = player!.transform.Find("Camera Target");
+            Assert.That(cameraTarget, Is.Not.Null);
+
+            directWall!.SetActive(false);
+            diagonalBlock!.SetActive(false);
+            orbitalFollow!.HorizontalAxis.Value = 90f;
+            orbitalFollow.VerticalAxis.Value = 20f;
+            yield return new WaitForSeconds(0.75f);
+
+            var pillarCollider = pillar!.GetComponent<BoxCollider>();
+            var targetDistance = Vector3.Distance(
+                cameraTarget!.position,
+                camera!.transform.position);
+
+            Assert.That(deoccluder!.CameraWasDisplaced(cinemachineCamera!), Is.True);
+            Assert.That(targetDistance, Is.LessThan(orbitalFollow.Radius - 0.5f));
+            Assert.That(camera.transform.position.x,
+                Is.GreaterThan(pillarCollider.bounds.max.x));
+        }
+
+        [UnityTest]
+        public IEnumerator CameraReturnsTowardOrbitRadiusAfterObstaclesAreCleared()
+        {
+            yield return LoadCombatSandbox();
+
+            var camera = Camera.main;
+            var player = GameObject.FindWithTag("Player");
+            var occlusionCases = GameObject.Find("Camera Occlusion Cases");
+            var cinemachineCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+            var deoccluder = Object.FindFirstObjectByType<CinemachineDeoccluder>();
+
+            Assert.That(camera, Is.Not.Null);
+            Assert.That(player, Is.Not.Null);
+            Assert.That(occlusionCases, Is.Not.Null);
+            Assert.That(cinemachineCamera, Is.Not.Null);
+            Assert.That(deoccluder, Is.Not.Null);
+            var cameraTarget = player!.transform.Find("Camera Target");
+            Assert.That(cameraTarget, Is.Not.Null);
+
+            yield return new WaitForSeconds(0.25f);
+            var obstructedDistance = Vector3.Distance(
+                cameraTarget!.position,
+                camera!.transform.position);
+            var obstructedCorrection = deoccluder!.GetCameraDisplacementDistance(
+                cinemachineCamera!);
+
+            occlusionCases!.SetActive(false);
+            yield return new WaitForSeconds(1.2f);
+            var clearedDistance = Vector3.Distance(
+                cameraTarget.position,
+                camera.transform.position);
+            var clearedCorrection = deoccluder.GetCameraDisplacementDistance(
+                cinemachineCamera);
+
+            Assert.That(clearedDistance, Is.GreaterThan(obstructedDistance + 1f));
+            Assert.That(clearedCorrection, Is.LessThan(obstructedCorrection - 1f));
+        }
+
+        private static IEnumerator LoadCombatSandbox()
+        {
+            yield return SceneManager.LoadSceneAsync(
+                "CombatSandbox",
+                LoadSceneMode.Single);
+            yield return null;
+            yield return null;
         }
     }
 }

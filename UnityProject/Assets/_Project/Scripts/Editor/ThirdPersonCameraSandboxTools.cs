@@ -16,6 +16,7 @@ namespace TinyVanguard.Editor
         private const string InputActionsPath =
             "Assets/_Project/Input/TinyVanguardInput.inputactions";
         private const string CameraRigName = "Third Person Camera";
+        private const string OcclusionCasesName = "Camera Occlusion Cases";
 
         private static readonly Vector2 Sensitivity = new(0.12f, 0.08f);
         private static readonly Vector2 VerticalLimits = new(-20f, 65f);
@@ -82,6 +83,9 @@ namespace TinyVanguard.Editor
             rotationComposer.Damping = new Vector2(0.15f, 0.15f);
             rotationComposer.CenterOnActivate = true;
 
+            var deoccluder = cameraRig.AddComponent<CinemachineDeoccluder>();
+            ConfigureDeoccluder(deoccluder);
+
             var controller = cameraRig.AddComponent<ThirdPersonCameraController>();
             controller.Configure(
                 inputActions,
@@ -92,6 +96,7 @@ namespace TinyVanguard.Editor
 
             camera.transform.position = new Vector3(0f, 3.45f, -5.64f);
             camera.transform.LookAt(cameraTarget.position);
+            var occlusionCases = CreateOcclusionCases(scene);
 
             ValidateCamera(
                 inputActions,
@@ -101,7 +106,9 @@ namespace TinyVanguard.Editor
                 cinemachineCamera,
                 orbitalFollow,
                 rotationComposer,
-                controller);
+                deoccluder,
+                controller,
+                occlusionCases);
 
             EditorUtility.SetDirty(camera.gameObject);
             EditorUtility.SetDirty(cameraRig);
@@ -140,6 +147,69 @@ namespace TinyVanguard.Editor
             return cameraTarget;
         }
 
+        private static void ConfigureDeoccluder(CinemachineDeoccluder deoccluder)
+        {
+            deoccluder.CollideAgainst = 1 << 0;
+            deoccluder.IgnoreTag = "Player";
+            deoccluder.TransparentLayers = 0;
+            deoccluder.MinimumDistanceFromTarget = 0.3f;
+            deoccluder.AvoidObstacles = new CinemachineDeoccluder.ObstacleAvoidance
+            {
+                Enabled = true,
+                DistanceLimit = 0f,
+                MinimumOcclusionTime = 0f,
+                CameraRadius = 0.25f,
+                Strategy = CinemachineDeoccluder.ObstacleAvoidance
+                    .ResolutionStrategy.PullCameraForward,
+                MaximumEffort = 4,
+                SmoothingTime = 0f,
+                Damping = 0.05f,
+                DampingWhenOccluded = 0.05f
+            };
+
+            var shotQuality = deoccluder.ShotQualityEvaluation;
+            shotQuality.Enabled = false;
+            deoccluder.ShotQualityEvaluation = shotQuality;
+        }
+
+        private static GameObject CreateOcclusionCases(Scene scene)
+        {
+            DestroyRootIfPresent(scene, OcclusionCasesName);
+
+            var root = new GameObject(OcclusionCasesName);
+            CreateObstacle(
+                root.transform,
+                "Direct Occlusion Wall",
+                new Vector3(0f, 1.75f, -3f),
+                new Vector3(4f, 3.5f, 0.5f));
+            CreateObstacle(
+                root.transform,
+                "Side Occlusion Pillar",
+                new Vector3(-3f, 1.75f, 0f),
+                new Vector3(0.75f, 3.5f, 0.75f));
+            CreateObstacle(
+                root.transform,
+                "Diagonal Occlusion Block",
+                new Vector3(2.25f, 1.75f, -2.25f),
+                new Vector3(1f, 3.5f, 1f));
+
+            return root;
+        }
+
+        private static void CreateObstacle(
+            Transform parent,
+            string name,
+            Vector3 position,
+            Vector3 scale)
+        {
+            var obstacle = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            obstacle.name = name;
+            obstacle.transform.SetParent(parent, true);
+            obstacle.transform.position = position;
+            obstacle.transform.localScale = scale;
+            obstacle.isStatic = true;
+        }
+
         private static void ValidateCamera(
             InputActionAsset inputActions,
             Camera camera,
@@ -148,7 +218,9 @@ namespace TinyVanguard.Editor
             CinemachineCamera cinemachineCamera,
             CinemachineOrbitalFollow orbitalFollow,
             CinemachineRotationComposer rotationComposer,
-            ThirdPersonCameraController controller)
+            CinemachineDeoccluder deoccluder,
+            ThirdPersonCameraController controller,
+            GameObject occlusionCases)
         {
             Require(brain != null, "Main Camera requires CinemachineBrain.");
             Require(cinemachineCamera.Follow == cameraTarget,
@@ -161,11 +233,30 @@ namespace TinyVanguard.Editor
             Require(!orbitalFollow.VerticalAxis.Wrap,
                 "Camera vertical axis must clamp instead of wrap.");
             Require(rotationComposer.enabled, "Rotation Composer must be enabled.");
+            Require(deoccluder.AvoidObstacles.Enabled,
+                "Cinemachine Deoccluder obstacle avoidance must be enabled.");
+            Require(deoccluder.CollideAgainst == (1 << 0),
+                "Deoccluder must collide with the prototype world layer.");
+            Require(deoccluder.IgnoreTag == "Player",
+                "Deoccluder must ignore the Player tag.");
+            Require(deoccluder.AvoidObstacles.CameraRadius > 0f,
+                "Deoccluder camera radius must be positive.");
             Require(controller.InputActions == inputActions,
                 "Camera controller must reference TinyVanguardInput.");
             Require(controller.OrbitalFollow == orbitalFollow,
                 "Camera controller must reference Orbital Follow.");
             Require(camera.CompareTag("MainCamera"), "Output camera must be MainCamera.");
+            RequireOcclusionCase(occlusionCases.transform, "Direct Occlusion Wall");
+            RequireOcclusionCase(occlusionCases.transform, "Side Occlusion Pillar");
+            RequireOcclusionCase(occlusionCases.transform, "Diagonal Occlusion Block");
+        }
+
+        private static void RequireOcclusionCase(Transform root, string childName)
+        {
+            var obstacle = root.Find(childName);
+            Require(obstacle != null, $"Missing camera occlusion case: {childName}");
+            Require(obstacle!.GetComponent<BoxCollider>() != null,
+                $"Camera occlusion case requires a BoxCollider: {childName}");
         }
 
         private static GameObject? FindRoot(Scene scene, string objectName)

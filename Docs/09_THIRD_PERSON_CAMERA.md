@@ -29,15 +29,15 @@ tags:
 - Inspector에서 조절 가능한 X/Y 감도
 - 수평 각도 순환과 수직 각도 제한
 - 플레이 중 커서 잠금과 포커스 해제 시 복구
+- `CinemachineDeoccluder` 기반 장애물 가림 처리
 - 샌드박스 자동 구성 및 EditMode·PlayMode 회귀 테스트
 
 ### 제외
 
-- 벽과 기둥에 의한 카메라 가림 방지: 작업 2.4
 - 게임 상태별 Gameplay/UI 입력 맵 전환: 작업 2.5
 - 조준 모드, 락온, 화면 흔들림과 줌: 후속 전투·폴리싱 작업
 
-FR-CAMERA-001의 “플레이어 추적”은 이번 작업에서 충족한다. “장애물에 가려지는 상황 최소화”는 작업 2.4가 끝나야 완전히 충족된다.
+FR-CAMERA-001의 플레이어 추적과 장애물 가림 최소화는 [[10_CAMERA_OCCLUSION]]까지 연결해 충족한다.
 
 ## 플레이 입력에서 화면 출력까지
 
@@ -63,6 +63,7 @@ flowchart LR
 | `CinemachineCamera` | Third Person Camera | Follow와 LookAt 대상을 `Camera Target`으로 지정 |
 | `CinemachineOrbitalFollow` | Third Person Camera | 대상에서 일정 거리의 구면 궤도 위치 계산 |
 | `CinemachineRotationComposer` | Third Person Camera | 카메라가 대상을 계속 바라보도록 회전 구성 |
+| `CinemachineDeoccluder` | Third Person Camera | 벽·기둥이 시야를 막으면 카메라 최종 위치 보정 |
 | `ThirdPersonCameraController` | Third Person Camera | Look 입력을 감도·제한이 적용된 Cinemachine 축 값으로 변환 |
 | `Camera Target` | Player 자식 | 캐릭터 발이 아닌 상체 높이를 추적·주시하는 기준점 |
 
@@ -78,11 +79,16 @@ CombatSandbox
 │   ├── Visual
 │   ├── Facing Marker
 │   └── Camera Target (local Y = 1.4)
-└── Third Person Camera
+├── Third Person Camera
     ├── CinemachineCamera
     ├── CinemachineOrbitalFollow
     ├── CinemachineRotationComposer
+    ├── CinemachineDeoccluder
     └── ThirdPersonCameraController
+└── Camera Occlusion Cases
+    ├── Direct Occlusion Wall
+    ├── Side Occlusion Pillar
+    └── Diagonal Occlusion Block
 ```
 
 ## 기본 조정값
@@ -99,6 +105,8 @@ CombatSandbox
 | Vertical Maximum | 65° | 위쪽 궤도 상한 |
 | Composer Damping | 0.15, 0.15 | 주시 회전의 수평·수직 지연 |
 | Cursor Lock | On | 포커스 중 포인터 이탈 방지 |
+| Deoccluder Radius | 0.25m | 벽 표면과 카메라 사이 여유 |
+| Deoccluder Return Damping | 0.05 | 장애물 제거 후 궤도 복귀 감쇠 |
 
 이 값은 최종 밸런스가 아니라 조작 검증용 기준선이다. 에셋의 실제 신장, 경기장 크기와 전투 속도가 정해지면 다시 조정한다.
 
@@ -171,7 +179,7 @@ Tiny Vanguard > Setup Third Person Camera Sandbox
 4. 큰 수직 입력이 65° 상한에서 멈춘다.
 5. Player를 이동하면 감쇠를 거쳐 실제 Main Camera도 추적 이동한다.
 
-기존 회귀 검사를 포함한 전체 PlayMode 결과는 **4/4 passed**이다.
+장애물 가림 테스트를 포함한 전체 PlayMode 결과는 **7/7 passed**이다.
 
 ## 수동 확인 시나리오
 
@@ -182,7 +190,7 @@ Tiny Vanguard > Setup Third Person Camera Sandbox
 5. 이동 중 마우스를 회전해 W 진행 방향이 새 카메라 방향을 따라 바뀌는지 확인한다.
 6. Game 뷰에서 포커스를 빼고 Play를 종료해 커서가 정상 복구되는지 확인한다.
 
-장애물 뒤에서 카메라가 캐릭터를 가릴 수 있는 현상은 이번 단계의 실패가 아니다. 해당 인수 기준은 작업 2.4에서 검증한다.
+정면 벽, 측면 기둥과 대각선 블록의 상세 수동 검증은 [[10_CAMERA_OCCLUSION]]을 따른다.
 
 ## 조정 순서
 
@@ -212,6 +220,7 @@ Tiny Vanguard > Setup Third Person Camera Sandbox
 
 - 입력 계약: [[07_INPUT_ACTIONS]]
 - 플레이어 이동: [[08_PLAYER_MOVEMENT]]
+- 카메라 장애물 가림: [[10_CAMERA_OCCLUSION]]
 - 개발일지: [[DevLog/2026-07-10_M1-third-person-camera]]
 - 프롬프트: [[PromptLog/2026-07-10_M1_third_person_camera_v01]]
 - OpenSpec: [player-control spec](../openspec/changes/build-action-rpg-vertical-slice/specs/player-control/spec.md)
