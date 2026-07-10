@@ -43,10 +43,14 @@ namespace TinyVanguard.Editor
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             var definition = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(
                 CombatDefinitionTools.MeleeGruntDefinitionPath);
+            var playerDefinition = AssetDatabase.LoadAssetAtPath<ActorDefinition>(
+                CombatDefinitionTools.PlayerDefinitionPath);
             Require(definition != null, "Create default enemy definitions first.");
+            Require(playerDefinition != null, "Create default player definition first.");
 
             var surface = ConfigureSurface(scene);
-            var enemy = ConfigureEnemy(scene, definition!);
+            var playerHealth = ConfigurePlayerHealth(scene, playerDefinition!);
+            var enemy = ConfigureEnemy(scene, definition!, playerHealth);
             BakeSurface(surface);
             Validate(surface, enemy, definition!);
 
@@ -83,7 +87,8 @@ namespace TinyVanguard.Editor
 
         private static EnemyNavigationController ConfigureEnemy(
             Scene scene,
-            EnemyDefinition definition)
+            EnemyDefinition definition,
+            ActorHealth playerHealth)
         {
             var enemy = scene.GetRootGameObjects()
                 .FirstOrDefault(root => root.name == EnemyName);
@@ -142,9 +147,51 @@ namespace TinyVanguard.Editor
             }
             reactions.Configure(health);
 
+            var brain = enemy.GetComponent<EnemyBrain>();
+            if (brain == null)
+            {
+                brain = enemy.AddComponent<EnemyBrain>();
+            }
+            brain.Configure(
+                definition,
+                navigation,
+                health,
+                playerHealth.transform,
+                playerHealth);
+            SerializeBrainReferences(
+                brain,
+                definition,
+                navigation,
+                health,
+                playerHealth);
+
             EnsureVisual(enemy.transform);
             EditorUtility.SetDirty(enemy);
             return navigation;
+        }
+
+        private static ActorHealth ConfigurePlayerHealth(
+            Scene scene,
+            ActorDefinition definition)
+        {
+            var player = scene.GetRootGameObjects()
+                .FirstOrDefault(root => root.CompareTag("Player"));
+            Require(player != null, "CombatSandbox Player is missing.");
+
+            var health = player!.GetComponent<ActorHealth>();
+            if (health == null)
+            {
+                health = player.AddComponent<ActorHealth>();
+            }
+            var movement = player.GetComponent<TinyVanguard.Player.PlayerMovementController>();
+            health.Configure(definition, movement);
+
+            var serialized = new SerializedObject(health);
+            RequireProperty(serialized, "_definition").objectReferenceValue = definition;
+            RequireProperty(serialized, "_playerMovement").objectReferenceValue = movement;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(health);
+            return health;
         }
 
         private static void EnsureVisual(Transform enemy)
@@ -189,6 +236,23 @@ namespace TinyVanguard.Editor
             EditorUtility.SetDirty(health);
         }
 
+        private static void SerializeBrainReferences(
+            EnemyBrain brain,
+            EnemyDefinition definition,
+            EnemyNavigationController navigation,
+            ActorHealth selfHealth,
+            ActorHealth playerHealth)
+        {
+            var serialized = new SerializedObject(brain);
+            RequireProperty(serialized, "_definition").objectReferenceValue = definition;
+            RequireProperty(serialized, "_navigation").objectReferenceValue = navigation;
+            RequireProperty(serialized, "_selfHealth").objectReferenceValue = selfHealth;
+            RequireProperty(serialized, "_target").objectReferenceValue = playerHealth.transform;
+            RequireProperty(serialized, "_targetHealth").objectReferenceValue = playerHealth;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(brain);
+        }
+
         private static void BakeSurface(NavMeshSurface surface)
         {
             surface.RemoveData();
@@ -216,6 +280,11 @@ namespace TinyVanguard.Editor
                     enemy.Agent.stoppingDistance,
                     definition.NavigationStoppingDistance),
                 "Enemy NavMeshAgent stopping distance is invalid.");
+            var brain = enemy.GetComponent<EnemyBrain>();
+            Require(brain != null && brain.Definition == definition,
+                "Enemy brain definition reference is invalid.");
+            Require(brain!.GetComponent<ActorHealth>() != null,
+                "Enemy health adapter is missing.");
             Require(NavMesh.SamplePosition(
                     enemy.transform.position,
                     out var startHit,

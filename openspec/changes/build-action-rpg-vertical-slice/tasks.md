@@ -33,7 +33,7 @@
 - [x] 4.1 Create enemy definition data for movement, detection, attack, disengage, and rewards
 - [x] 4.2 Implement Idle, Chase, Attack, Hit, Return, and Dead state transitions
 - [x] 4.3 Configure NavMesh baking and agent movement in the combat sandbox
-- [ ] 4.4 Implement player detection, pursuit, attack-range stopping, and cooldown behavior
+- [x] 4.4 Implement player detection, pursuit, attack-range stopping, and cooldown behavior
 - [ ] 4.5 Implement disengage and return-to-home behavior
 - [ ] 4.6 Prevent dead enemies from moving, attacking, or issuing repeated rewards
 - [ ] 4.7 Add the minimum spatial-separation rule for five simultaneous melee enemies

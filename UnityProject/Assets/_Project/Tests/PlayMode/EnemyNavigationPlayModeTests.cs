@@ -19,9 +19,15 @@ namespace TinyVanguard.Tests.PlayMode
             var enemy = GameObject.Find("MeleeGrunt");
             Assert.That(enemy, Is.Not.Null);
             var navigation = enemy!.GetComponent<EnemyNavigationController>();
+            var brain = enemy.GetComponent<EnemyBrain>();
+            if (brain != null)
+            {
+                brain.enabled = false;
+            }
             Assert.That(navigation, Is.Not.Null);
             Assert.That(navigation!.Definition, Is.Not.Null);
             Assert.That(navigation.IsOnNavMesh, Is.True);
+            navigation.Stop();
             Assert.That(
                 navigation.Agent.speed,
                 Is.EqualTo(navigation.Definition.MoveSpeed).Within(0.001f));

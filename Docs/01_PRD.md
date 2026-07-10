@@ -1,6 +1,6 @@
 ---
 title: Project Tiny Vanguard PRD
-version: 1.3
+version: 1.4
 status: active
 owner: 이수미
 created: 2026-07-10
@@ -18,7 +18,7 @@ tags:
 | 항목 | 내용 |
 |---|---|
 | 제품명 | Project Tiny Vanguard(가제) |
-| 문서 버전 | 1.3 |
+| 문서 버전 | 1.4 |
 | 단계 | 구현 진행 중 |
 | 제품 형태 | 싱글 플레이 3D 액션 RPG 버티컬 슬라이스 |
 | 주요 목적 | 플레이 가능한 데모 제작 + 바이브코딩 교육 사례 구축 |
@@ -273,13 +273,13 @@ flowchart LR
 
 | 구분 | 상태 | 근거 |
 |---|---:|---|
-| OpenSpec 전체 | 24/64, 37.5% | 작업 1.1~4.3 완료 |
+| OpenSpec 전체 | 25/64, 39.1% | 작업 1.1~4.4 완료 |
 | M0 프로젝트 기반 | 6/6, 100% | Unity 프로젝트·패키지·씬·빈 빌드 완료 |
 | M1 플레이어 조작 | 7/7, 100% | 통합 수동 시나리오·교육 기록까지 완료 |
 | PRD 플레이어·카메라 요구 | 5/6, 83.3% | FR-PLAYER-004 공격 중 이동만 미구현 |
 | M2 체력·전투 규칙 | 8/8, 100% | 실제 범위 피해와 공격 시작→피해 0.1500초 측정 완료 |
-| M3 적 AI | 3/8, 37.5% | NavMesh 베이크·완전 경로·Agent 이동·정지 검증 완료 |
-| 자동 테스트 | EditMode 53/53, PlayMode 16/16 | 전체 회귀 통과 |
+| M3 적 AI | 4/8, 50.0% | Player 탐지·추적·공격 거리 정지·1.2초 쿨다운 검증 완료 |
+| 자동 테스트 | EditMode 53/53, PlayMode 17/17 | 전체 회귀 통과 |
 
 ### 완료된 요구사항
 
@@ -291,7 +291,7 @@ flowchart LR
 - [x] FR-UI-005의 입력 맵 분리 기반 — Playing/Paused/Victory/Defeat 차단 정책
 - [x] AC-001 이동 — CombatSandbox 자동 검증 완료
 - [x] FR-COMBAT-005의 체력 0·사망 단일 발생 순수 규칙
-- [x] AC-004의 무적 피해 거부 규칙 — 실제 Player 어댑터 연결은 후속 작업
+- [x] AC-004 무적 피해 거부 규칙과 Player ActorHealth·회피 어댑터 연결
 - [x] FR-DATA-001 Actor·Attack 정의와 런타임 상태 분리
 - [x] FR-DATA-002 핵심 체력·공격 수치의 Inspector 조정 기반
 - [x] FR-COMBAT-001 기본 공격 입력·애니메이션 실행 기반
@@ -303,12 +303,13 @@ flowchart LR
 - [x] FR-DATA-001·002 일반 적 Actor·Attack·Enemy 정의 조합과 Inspector 수치 기반
 - [x] FR-AI-001 기반 — Idle·Chase·Attack·Hit·Return·Dead 순수 상태 전이
 - [x] FR-AI-002 기반 — CombatSandbox NavMeshSurface·MeleeGrunt Agent 경로 이동
+- [x] FR-AI-002·003 Player 탐지·추적·공격 거리 정지·공격 쿨다운
 
 ### 다음 검증 대상
 
-- [ ] FR-AI-002·003 플레이어 탐지·추적·공격 거리 정지·쿨다운 행동 — OpenSpec 4.4
+- [ ] FR-AI-004 이탈 거리와 초기 위치 복귀·Idle 재진입 — OpenSpec 4.5
 
-현재 상태는 **적 정의·상태 전이·NavMesh 이동 기반을 완료했으며, 다음 단계는 플레이어 거리와 쿨다운을 상태 신호와 실제 행동에 연결하는 작업이다**.
+현재 상태는 **적 탐지·추적·공격과 쿨다운까지 실제 씬에 연결했으며, 다음 단계는 전투 이탈과 초기 위치 복귀 행동이다**.
 
 ## 17. 변경 이력
 
@@ -327,3 +328,4 @@ flowchart LR
 | 1.1 | 2026-07-11 | MeleeGrunt 적 정의 데이터와 OpenSpec 4.1 반영 |
 | 1.2 | 2026-07-11 | 6상태 적 상태 머신과 OpenSpec 4.2 반영 |
 | 1.3 | 2026-07-11 | CombatSandbox NavMesh 베이크·Agent 이동과 OpenSpec 4.3 반영 |
+| 1.4 | 2026-07-11 | Player 탐지·추적·공격 정지·쿨다운과 OpenSpec 4.4 반영 |
