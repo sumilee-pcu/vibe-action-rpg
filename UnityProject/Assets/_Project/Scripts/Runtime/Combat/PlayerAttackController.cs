@@ -13,6 +13,7 @@ namespace TinyVanguard.Combat
         [SerializeField] private InputActionAsset _inputActions = null!;
         [SerializeField] private AttackDefinition _attackDefinition = null!;
         [SerializeField] private Animator _animator = null!;
+        [SerializeField] private ActorHealth? _actorHealth;
 
         private InputActionMap _gameplayMap = null!;
         private InputAction _attackAction = null!;
@@ -47,6 +48,11 @@ namespace TinyVanguard.Combat
                 _animator = GetComponent<Animator>();
             }
 
+            if (_actorHealth == null)
+            {
+                _actorHealth = GetComponent<ActorHealth>();
+            }
+
             _gameplayMap = _inputActions?.FindActionMap("Gameplay");
             _attackAction = _gameplayMap?.FindAction("Attack");
             if (_gameplayMap == null
@@ -67,6 +73,11 @@ namespace TinyVanguard.Combat
             {
                 _attackAction.performed += OnAttackPerformed;
             }
+
+            if (_actorHealth != null)
+            {
+                _actorHealth.Died += OnActorDied;
+            }
         }
 
         private void OnDisable()
@@ -74,6 +85,11 @@ namespace TinyVanguard.Combat
             if (_attackAction != null)
             {
                 _attackAction.performed -= OnAttackPerformed;
+            }
+
+            if (_actorHealth != null)
+            {
+                _actorHealth.Died -= OnActorDied;
             }
 
             CancelAttack();
@@ -91,6 +107,7 @@ namespace TinyVanguard.Combat
         {
             if (!isActiveAndEnabled
                 || !_gameplayMap.enabled
+                || (_actorHealth != null && !_actorHealth.CanAct)
                 || IsAttackInProgress)
             {
                 return false;
@@ -127,6 +144,11 @@ namespace TinyVanguard.Combat
         private void OnAttackPerformed(InputAction.CallbackContext context)
         {
             TryStartAttack();
+        }
+
+        private void OnActorDied(ActorHealth actor)
+        {
+            CancelAttack();
         }
 
         private void CancelAttack()

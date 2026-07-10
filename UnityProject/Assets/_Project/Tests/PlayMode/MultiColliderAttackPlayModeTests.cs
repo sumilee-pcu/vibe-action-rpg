@@ -16,6 +16,8 @@ namespace TinyVanguard.Tests.PlayMode
             target.SetActive(false);
             var health = target.AddComponent<ActorHealth>();
             health.Configure(definition);
+            var damageEventCount = 0;
+            health.DamageApplied += damageEvent => damageEventCount++;
             CreateCollider(target.transform, "Body Collider", Vector3.zero);
             CreateCollider(target.transform, "Weapon Collider", Vector3.right * 0.2f);
             target.SetActive(true);
@@ -30,6 +32,7 @@ namespace TinyVanguard.Tests.PlayMode
             Assert.That(appliedTargets, Is.EqualTo(1));
             Assert.That(health.State.CurrentHealth, Is.EqualTo(85));
             Assert.That(execution.RegisteredTargetCount, Is.EqualTo(1));
+            Assert.That(damageEventCount, Is.EqualTo(1));
 
             var secondExecution = new AttackExecution(2);
             var secondApplied = AttackHitResolver.ApplyDamage(
@@ -38,6 +41,7 @@ namespace TinyVanguard.Tests.PlayMode
                 15);
             Assert.That(secondApplied, Is.EqualTo(1));
             Assert.That(health.State.CurrentHealth, Is.EqualTo(70));
+            Assert.That(damageEventCount, Is.EqualTo(2));
 
             Object.Destroy(target);
             Object.Destroy(definition);

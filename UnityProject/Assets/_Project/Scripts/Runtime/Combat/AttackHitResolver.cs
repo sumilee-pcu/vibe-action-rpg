@@ -28,7 +28,7 @@ namespace TinyVanguard.Combat
                     continue;
                 }
 
-                if (target.ApplyDamage(damage).WasApplied)
+                if (target.ApplyDamage(damage, collider.bounds.center).WasApplied)
                 {
                     appliedTargetCount++;
                 }

@@ -25,7 +25,7 @@
 - [x] 3.4 Connect player attack animation to a configurable active hit window
 - [x] 3.5 Implement one-hit-per-target-per-attack execution semantics
 - [x] 3.6 Add EditMode or focused PlayMode coverage for enemies with multiple colliders
-- [ ] 3.7 Add hit reaction, death transition, and damage-number event output
+- [x] 3.7 Add hit reaction, death transition, and damage-number event output
 - [ ] 3.8 Measure and document animation-to-hit timing in the combat sandbox
 
 ## 4. Enemy AI
