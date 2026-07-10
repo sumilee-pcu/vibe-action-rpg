@@ -31,7 +31,7 @@ tags:
 
 ### 제외
 
-- 마우스 카메라 회전과 추적: 작업 2.3
+- 마우스 카메라 회전과 추적: 별도 계약 [[09_THIRD_PERSON_CAMERA]]
 - 카메라 장애물 회피: 작업 2.4
 - 세션 상태별 입력 차단: 작업 2.5
 - 회피 이동과 무적: 작업 2.6
@@ -89,9 +89,10 @@ rotation = RotateTowards(current, target, maximumDegreesDelta)
 - 'Player': 원점에 배치된 CharacterController 루트
 - 'Visual': 플레이어 자식 캡슐
 - 'Facing Marker': 플레이어의 앞 방향 표시
-- 'Main Camera': (-7, 7, -7)의 고정 사선 카메라
+- 'Main Camera': CinemachineBrain이 가상 카메라 상태를 출력
+- 'Third Person Camera': Player의 Camera Target을 추적하는 구면 궤도 카메라
 
-카메라가 월드 축과 다른 방향을 보도록 배치했기 때문에 W 입력이 단순 월드 +Z가 아니라 카메라가 바라보는 수평 방향으로 이동하는지 눈으로 확인할 수 있다.
+마우스로 카메라를 회전한 뒤 W를 눌러 단순 월드 +Z가 아니라 현재 카메라가 바라보는 수평 방향으로 이동하는지 눈으로 확인할 수 있다.
 
 ## 자동 검증
 
@@ -104,7 +105,7 @@ rotation = RotateTowards(current, target, maximumDegreesDelta)
 - 초당 회전량 적용
 - 입력 0에서 방향 유지
 
-전체 EditMode 결과: 13/13 passed.
+작업 2.2 완료 시점의 전체 EditMode 결과: 13/13 passed.
 
 ### PlayMode
 
@@ -114,7 +115,7 @@ rotation = RotateTowards(current, target, maximumDegreesDelta)
 2. 이동 방향과 카메라 수평 전방의 내적이 0.98보다 크다.
 3. 캐릭터 전방과 실제 이동 방향의 내적이 0.95보다 크다.
 
-전체 PlayMode 결과: 2/2 passed.
+작업 2.2 완료 시점의 전체 PlayMode 결과: 2/2 passed.
 
 ## 수동 확인 시나리오
 
@@ -128,6 +129,7 @@ rotation = RotateTowards(current, target, maximumDegreesDelta)
 ## 연결
 
 - 입력 계약: [[07_INPUT_ACTIONS]]
+- 3인칭 카메라: [[09_THIRD_PERSON_CAMERA]]
 - 개발일지: [[DevLog/2026-07-10_M1-camera-relative-movement]]
 - 프롬프트: [[PromptLog/2026-07-10_M1_camera_relative_movement_v01]]
 - 오류 기록: [[Troubleshooting/2026-07-10-input-system-playmode-test-lifecycle]]

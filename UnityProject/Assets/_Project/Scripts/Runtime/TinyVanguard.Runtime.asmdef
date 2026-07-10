@@ -2,7 +2,8 @@
   "name": "TinyVanguard.Runtime",
   "rootNamespace": "TinyVanguard",
   "references": [
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Unity.Cinemachine"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

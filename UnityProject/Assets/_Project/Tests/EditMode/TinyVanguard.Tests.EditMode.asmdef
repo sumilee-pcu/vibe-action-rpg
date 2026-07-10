@@ -3,7 +3,8 @@
   "rootNamespace": "TinyVanguard.Tests.EditMode",
   "references": [
     "TinyVanguard.Runtime",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Unity.Cinemachine"
   ],
   "includePlatforms": [
     "Editor"

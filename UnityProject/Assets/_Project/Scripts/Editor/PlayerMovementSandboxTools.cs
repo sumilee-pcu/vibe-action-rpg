@@ -46,6 +46,11 @@ namespace TinyVanguard.Editor
             var ground = CreateGround();
             var player = CreatePlayer(inputActions!, camera!.transform);
             ConfigureCamera(camera, player.transform);
+            ThirdPersonCameraSandboxTools.ConfigureLoadedScene(
+                scene,
+                inputActions,
+                camera,
+                player);
 
             ValidateScene(scene, inputActions, camera, player, ground);
             EditorSceneManager.MarkSceneDirty(scene);

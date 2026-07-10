@@ -4,7 +4,8 @@
   "references": [
     "TinyVanguard.Runtime",
     "Unity.InputSystem",
-    "Unity.InputSystem.TestFramework"
+    "Unity.InputSystem.TestFramework",
+    "Unity.Cinemachine"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
