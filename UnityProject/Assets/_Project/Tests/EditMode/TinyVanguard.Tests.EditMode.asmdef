@@ -1,0 +1,21 @@
+{
+  "name": "TinyVanguard.Tests.EditMode",
+  "rootNamespace": "TinyVanguard.Tests.EditMode",
+  "references": [
+    "TinyVanguard.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

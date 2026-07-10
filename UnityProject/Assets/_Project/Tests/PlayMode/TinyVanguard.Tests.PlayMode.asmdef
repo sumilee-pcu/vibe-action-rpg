@@ -1,0 +1,19 @@
+{
+  "name": "TinyVanguard.Tests.PlayMode",
+  "rootNamespace": "TinyVanguard.Tests.PlayMode",
+  "references": [
+    "TinyVanguard.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

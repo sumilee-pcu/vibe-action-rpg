@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+
+# IDEs and generated solution files
+.idea/
+.vs/
+.vscode/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity generated folders
+UnityProject/[Ll]ibrary/
+UnityProject/[Tt]emp/
+UnityProject/[Oo]bj/
+UnityProject/[Bb]uild/
+UnityProject/[Bb]uilds/
+UnityProject/[Ll]ogs/
+UnityProject/[Uu]ser[Ss]ettings/
+UnityProject/[Mm]emoryCaptures/
+UnityProject/[Rr]ecordings/
+
+# Root build and capture outputs
+[Bb]uilds/
+[Cc]aptures/
+
+# Unity generated crash and diagnostics files
+sysinfo.txt
+*.stacktrace
+
+# Asset Store tools and transient artifacts
+UnityProject/Assets/AssetStoreTools*
+UnityProject/Assets/StreamingAssets/aa.meta
+UnityProject/Assets/StreamingAssets/aa/*

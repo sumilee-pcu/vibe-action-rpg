@@ -1,0 +1,27 @@
+schema: spec-driven
+
+context: |
+  Project: Project Tiny Vanguard, a 10–15 minute third-person low-poly action RPG vertical slice.
+  Engine: Unity 6000.3.11f1 (Unity 6.3 LTS), Universal 3D, URP 17.3.0.
+  Primary platform: macOS Apple Silicon. Cross-check platform: Windows 11.
+  Core packages: Input System, Cinemachine, AI Navigation, Unity Test Framework.
+  Product PRD and educational source documents live in Docs/ as Obsidian-compatible Markdown.
+  Use PRD/OpenSpec requirement IDs to link prompts, code, tests, dev logs, troubleshooting, and lessons.
+  Keep runtime state out of ScriptableObject definition assets.
+  Prefer small, explainable MonoBehaviour adapters around testable C# game rules.
+  Do not add multiplayer, open world, complex inventory, crafting, shop, or runtime generative AI to MVP.
+  Write planning artifacts in Korean; retain exact API, class, path, and requirement identifiers in English.
+
+rules:
+  proposal:
+    - State explicit non-goals and educational impact when scope changes.
+    - List every new or modified capability using stable kebab-case names.
+  specs:
+    - Make every scenario observable in EditMode tests, focused PlayMode tests, or a documented manual scenario.
+    - Include boundary and duplicate-event behavior for combat, death, rewards, cooldowns, and session transitions.
+  design:
+    - Explain alternatives and why the selected approach is suitable for a small educational Unity project.
+    - Identify Unity serialization, lifecycle, package compatibility, performance, and cross-platform risks.
+  tasks:
+    - Keep each task small enough for one focused coding session.
+    - Include tests, build evidence, prompt logs, and teaching notes as deliverables rather than optional follow-up.
