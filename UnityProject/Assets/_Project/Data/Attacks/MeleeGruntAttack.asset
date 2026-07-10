@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39cc0a8ec5c645be9ccf0d66af4d9059, type: 3}
+  m_Name: MeleeGruntAttack
+  m_EditorClassIdentifier: TinyVanguard.Runtime::TinyVanguard.Combat.AttackDefinition
+  _identifier: melee-grunt-swipe
+  _displayName: Grunt Swipe
+  _baseDamage: 8
+  _range: 1.5
+  _hitRadius: 0.45
+  _activeStartTime: 0.35
+  _activeEndTime: 0.5
+  _cooldown: 1.2
+  _staggerDuration: 0.15
+  _movementMultiplier: 0

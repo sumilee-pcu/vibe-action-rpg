@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using TinyVanguard.Combat;
+using TinyVanguard.Enemies;
 using UnityEditor;
 
 namespace TinyVanguard.Tests.EditMode
@@ -46,6 +47,26 @@ namespace TinyVanguard.Tests.EditMode
             Assert.That(attack.Cooldown, Is.GreaterThanOrEqualTo(attack.ActiveEndTime));
             Assert.That(attack.MovementMultiplier, Is.InRange(0f, 1f));
             AssertHasNoRuntimeStateFields(typeof(AttackDefinition));
+        }
+
+        [Test]
+        public void DefaultEnemyDefinitionComposesValidTuningData()
+        {
+            var enemy = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(
+                "Assets/_Project/Data/Enemies/MeleeGrunt.asset");
+
+            Assert.That(enemy, Is.Not.Null);
+            Assert.That(enemy!.Actor.Identifier, Is.EqualTo("melee-grunt"));
+            Assert.That(enemy.Attack.Identifier, Is.EqualTo("melee-grunt-swipe"));
+            Assert.That(enemy.MoveSpeed, Is.EqualTo(3.5f));
+            Assert.That(enemy.ExperienceReward, Is.EqualTo(25));
+            Assert.That(enemy.AttackRange, Is.LessThanOrEqualTo(enemy.DetectionRange));
+            Assert.That(enemy.DetectionRange, Is.LessThan(enemy.DisengageRange));
+            Assert.That(
+                enemy.NavigationStoppingDistance,
+                Is.LessThanOrEqualTo(enemy.AttackRange));
+            Assert.That(enemy.AttackCooldown, Is.GreaterThanOrEqualTo(enemy.Attack.Cooldown));
+            AssertHasNoRuntimeStateFields(typeof(EnemyDefinition));
         }
 
         private static void AssertHasNoRuntimeStateFields(Type definitionType)
