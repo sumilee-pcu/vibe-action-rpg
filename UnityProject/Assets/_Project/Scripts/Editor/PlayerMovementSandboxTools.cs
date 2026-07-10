@@ -51,6 +51,7 @@ namespace TinyVanguard.Editor
                 inputActions,
                 camera,
                 player);
+            GameplayInputGateSandboxTools.ConfigureLoadedScene(scene, inputActions);
 
             ValidateScene(scene, inputActions, camera, player, ground);
             EditorSceneManager.MarkSceneDirty(scene);

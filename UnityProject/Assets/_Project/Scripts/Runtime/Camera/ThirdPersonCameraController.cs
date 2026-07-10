@@ -19,12 +19,7 @@ namespace TinyVanguard.CameraControl
         [SerializeField] private float _maximumVerticalAngle = 65f;
         [SerializeField] private bool _invertVertical;
 
-        [Header("Cursor")]
-        [SerializeField] private bool _lockCursorOnFocus = true;
-
-        private InputActionMap _gameplayMap = null!;
         private InputAction _lookAction = null!;
-        private bool _lockedCursor;
 
         public InputActionAsset InputActions => _inputActions;
         public CinemachineOrbitalFollow OrbitalFollow => _orbitalFollow;
@@ -37,8 +32,7 @@ namespace TinyVanguard.CameraControl
             InputActionAsset inputActions,
             CinemachineOrbitalFollow orbitalFollow,
             Vector2 sensitivity,
-            Vector2 verticalLimits,
-            bool lockCursorOnFocus)
+            Vector2 verticalLimits)
         {
             _inputActions = inputActions;
             _orbitalFollow = orbitalFollow;
@@ -46,7 +40,6 @@ namespace TinyVanguard.CameraControl
             _verticalSensitivity = Mathf.Max(0f, sensitivity.y);
             _minimumVerticalAngle = Mathf.Min(verticalLimits.x, verticalLimits.y);
             _maximumVerticalAngle = Mathf.Max(verticalLimits.x, verticalLimits.y);
-            _lockCursorOnFocus = lockCursorOnFocus;
             ApplyAxisSettings();
         }
 
@@ -62,9 +55,9 @@ namespace TinyVanguard.CameraControl
                 _inputActions = InputSystem.actions;
             }
 
-            _gameplayMap = _inputActions?.FindActionMap("Gameplay");
-            _lookAction = _gameplayMap?.FindAction("Look");
-            if (_gameplayMap == null || _lookAction == null)
+            var gameplayMap = _inputActions?.FindActionMap("Gameplay");
+            _lookAction = gameplayMap?.FindAction("Look");
+            if (gameplayMap == null || _lookAction == null)
             {
                 Debug.LogError(
                     $"[{nameof(ThirdPersonCameraController)}] Missing Gameplay/Look input.",
@@ -74,27 +67,6 @@ namespace TinyVanguard.CameraControl
             }
 
             ApplyAxisSettings();
-        }
-
-        private void OnEnable()
-        {
-            if (!Application.isPlaying)
-            {
-                return;
-            }
-
-            _gameplayMap?.Enable();
-            ApplyCursorLock(Application.isFocused);
-        }
-
-        private void OnDisable()
-        {
-            if (!Application.isPlaying)
-            {
-                return;
-            }
-
-            ReleaseCursor();
         }
 
         private void Update()
@@ -122,16 +94,6 @@ namespace TinyVanguard.CameraControl
 
             _orbitalFollow.HorizontalAxis.Value = nextOrbit.x;
             _orbitalFollow.VerticalAxis.Value = nextOrbit.y;
-        }
-
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            if (!Application.isPlaying)
-            {
-                return;
-            }
-
-            ApplyCursorLock(hasFocus);
         }
 
         private void OnValidate()
@@ -174,29 +136,5 @@ namespace TinyVanguard.CameraControl
             _orbitalFollow.VerticalAxis = verticalAxis;
         }
 
-        private void ApplyCursorLock(bool hasFocus)
-        {
-            if (!_lockCursorOnFocus || !hasFocus || Application.isBatchMode)
-            {
-                ReleaseCursor();
-                return;
-            }
-
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            _lockedCursor = true;
-        }
-
-        private void ReleaseCursor()
-        {
-            if (!_lockedCursor)
-            {
-                return;
-            }
-
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            _lockedCursor = false;
-        }
     }
 }

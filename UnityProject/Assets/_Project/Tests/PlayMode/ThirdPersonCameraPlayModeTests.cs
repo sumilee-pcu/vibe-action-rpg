@@ -76,16 +76,21 @@ namespace TinyVanguard.Tests.PlayMode
 
             var player = GameObject.FindWithTag("Player");
             var camera = Camera.main;
+            var occlusionCases = GameObject.Find("Camera Occlusion Cases");
             Assert.That(player, Is.Not.Null);
             Assert.That(camera, Is.Not.Null);
+            Assert.That(occlusionCases, Is.Not.Null);
+
+            occlusionCases!.SetActive(false);
+            yield return new WaitForSeconds(0.2f);
 
             var startCameraPosition = camera!.transform.position;
             player!.transform.position += Vector3.right * 3f;
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.75f);
 
             Assert.That(
                 Vector3.Distance(camera.transform.position, startCameraPosition),
-                Is.GreaterThan(0.1f));
+                Is.GreaterThan(0.25f));
         }
 
         [UnityTest]

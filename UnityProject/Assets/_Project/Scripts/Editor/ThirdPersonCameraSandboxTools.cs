@@ -91,8 +91,7 @@ namespace TinyVanguard.Editor
                 inputActions,
                 orbitalFollow,
                 Sensitivity,
-                VerticalLimits,
-                true);
+                VerticalLimits);
 
             camera.transform.position = new Vector3(0f, 3.45f, -5.64f);
             camera.transform.LookAt(cameraTarget.position);

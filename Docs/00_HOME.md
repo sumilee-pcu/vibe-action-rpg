@@ -26,6 +26,7 @@ status: active
 - 플레이어 이동 계약: [[08_PLAYER_MOVEMENT]]
 - 3인칭 카메라 계약: [[09_THIRD_PERSON_CAMERA]]
 - 카메라 장애물 가림 처리: [[10_CAMERA_OCCLUSION]]
+- 게임플레이 입력 차단: [[11_GAMEPLAY_INPUT_GATING]]
 - 구현 명세: [OpenSpec change](../openspec/changes/build-action-rpg-vertical-slice/proposal.md)
 - 구현 작업: [OpenSpec tasks](../openspec/changes/build-action-rpg-vertical-slice/tasks.md)
 - 기술 결정: [[Decisions/ADR-0001-documentation-source-of-truth]]

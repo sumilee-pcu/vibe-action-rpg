@@ -18,7 +18,6 @@ namespace TinyVanguard.Player
         [SerializeField] private float _groundedVerticalVelocity = -2f;
 
         private CharacterController _characterController = null!;
-        private InputActionMap _gameplayMap = null!;
         private InputAction _moveAction = null!;
         private float _verticalVelocity;
 
@@ -36,9 +35,9 @@ namespace TinyVanguard.Player
                 _inputActions = InputSystem.actions;
             }
 
-            _gameplayMap = _inputActions?.FindActionMap("Gameplay");
-            _moveAction = _gameplayMap?.FindAction("Move");
-            if (_gameplayMap == null || _moveAction == null)
+            var gameplayMap = _inputActions?.FindActionMap("Gameplay");
+            _moveAction = gameplayMap?.FindAction("Move");
+            if (gameplayMap == null || _moveAction == null)
             {
                 Debug.LogError(
                     $"[{nameof(PlayerMovementController)}] Missing Gameplay/Move input.",
@@ -59,19 +58,6 @@ namespace TinyVanguard.Player
                     this);
                 enabled = false;
             }
-        }
-
-        private void OnEnable()
-        {
-            if (_gameplayMap != null)
-            {
-                _gameplayMap.Enable();
-            }
-        }
-
-        private void OnDisable()
-        {
-            _gameplayMap?.Disable();
         }
 
         private void Update()
