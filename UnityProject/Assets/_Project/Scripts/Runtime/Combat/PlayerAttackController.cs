@@ -23,6 +23,7 @@ namespace TinyVanguard.Combat
         public bool IsAttackInProgress { get; private set; }
         public bool IsHitWindowActive { get; private set; }
         public int AttackSequence { get; private set; }
+        public AttackExecution? CurrentExecution { get; private set; }
 
         public void Configure(
             InputActionAsset inputActions,
@@ -98,6 +99,7 @@ namespace TinyVanguard.Combat
             IsAttackInProgress = true;
             IsHitWindowActive = false;
             AttackSequence++;
+            CurrentExecution = new AttackExecution(AttackSequence);
             _animator.ResetTrigger(AttackTrigger);
             _animator.SetTrigger(AttackTrigger);
             return true;
